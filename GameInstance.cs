@@ -2,7 +2,7 @@ namespace GameModeMgr
 {
     public interface IGameInstance
     {
-        void Start();
+        void Start(int initialMode);
         bool Loop(float frameSecs);
     }
 
