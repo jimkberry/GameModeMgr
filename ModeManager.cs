@@ -138,9 +138,10 @@ namespace GameModeMgr
 			return _modeDataStack.Count > 0;
 		}	
 
-		public virtual void DispatchCmd(int cmd, object param = null) 
+		public virtual bool  DispatchCmd(object cmd) 
 		{
-			CurrentMode()?.HandleCmd(cmd, param);  
+			// returns true if the command was eaten
+			return CurrentMode()?.HandleCmd(cmd) ?? false;  
 		}
 
 		public IGameMode CurrentMode()

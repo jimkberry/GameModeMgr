@@ -10,14 +10,14 @@ namespace GameModeMgr
 		void Pause();
 		void Resume(string prevModeName, object prevModeResult);
 		object End();    
-        void HandleCmd(int cmd, object param);
+        bool HandleCmd(object cmd);
 		string ModeName();
 	};
 
 
 	public abstract class BaseGameMode : IGameMode
 	{	
-		protected Dictionary<int,dynamic> _cmdDispatch;  	
+		protected Dictionary<string,dynamic> _cmdDispatch;  	
 		public ModeManager manager; 
 		public IGameInstance gameInst;
 			
@@ -26,7 +26,7 @@ namespace GameModeMgr
 			// Called by manager before Start()
 			// Not virtual
 			// TODO: this should be the engine and not the modeMgr - but what IS an engine...
- 			_cmdDispatch = new Dictionary<int, dynamic>();
+ 			_cmdDispatch = new Dictionary<string, dynamic>();
 			manager = mgr;
 			gameInst = gInst;
 
@@ -40,9 +40,9 @@ namespace GameModeMgr
 		public virtual void Resume(string prevModeName, object prevModeResult) {}	
 		public virtual object End() { return null;}     
 
-        public virtual void HandleCmd(int cmd, object param)
+        public virtual bool HandleCmd(object cmd)
         {
-            _cmdDispatch[cmd](param);            
+            return _cmdDispatch[cmd.GetType().Name](cmd);        
         }	
         public virtual string ModeName() => this.GetType().Name;		   	
 	};
