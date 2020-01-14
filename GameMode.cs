@@ -11,7 +11,6 @@ namespace GameModeMgr
 		void Pause();
 		void Resume(string prevModeName, object prevModeResult);
 		object End();    
-        bool HandleCmd(object cmd);
 		string ModeName();
 	};
 
