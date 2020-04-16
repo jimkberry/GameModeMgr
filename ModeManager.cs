@@ -1,41 +1,40 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace GameModeMgr 
+namespace GameModeMgr
 {
 	public class ModeManager {
 
 		// Operations
 
 		protected enum ModeOp
-		{ 
-			kNop = 0,
-			kSwitch,
-			kPush,
-			kPop,
-			kQuit
-		};	
-		protected class OpData 
 		{
-			public ModeOp nextOp = ModeOp.kNop;		
-			public int nextModeId;
-			public object nextParam = null;
+			Nop = 0,
+			Switch,
+			Push,
+			Pop,
+			Quit
+		};
+		protected class OpData
+		{
+			public ModeOp NextOp;
+			public int NextModeId;
+			public object NextParam;
 
-			public static OpData DoNothing;
-			public static OpData DoQuit;		
+			public readonly static OpData DoNothing;
+			public readonly static OpData DoQuit;
 
-			public OpData(ModeOp op, int modeId, object param) 
+			public OpData(ModeOp op, int modeId, object param)
 			{
-				nextOp = op; 
-				nextModeId = modeId;
-				nextParam = param;
+				NextOp = op;
+				NextModeId = modeId;
+				NextParam = param;
 			}
 
 			static OpData()
 			{
-				DoNothing = new OpData(ModeOp.kNop, -1, null);
-				DoQuit = new OpData(ModeOp.kQuit, -1, null);			
+				DoNothing = new OpData(ModeOp.Nop, -1, null);
+				DoQuit = new OpData(ModeOp.Quit, -1, null);
 			}
 		}
 
@@ -49,55 +48,51 @@ namespace GameModeMgr
 				mode = m;
 			}
 		}
-	
-		// Singleton access
-		// TODO: do we REALLY want the singleton pattern?
-		public static ModeManager instance {get; private set;} = null; 
-		
+
+
 		//
 		// Lifecycle
 		//
 
 		protected IModeFactory _factory;
 		protected IGameInstance _gameInst;
-		protected Stack<ModeData> _modeDataStack = null;	
+		protected Stack<ModeData> _modeDataStack = null;
 		protected OpData _nextOpData = null;
 
-		public ModeManager(IModeFactory factory, IGameInstance gameInst = null) 
+		public ModeManager(IModeFactory factory, IGameInstance gameInst = null)
 		{
-			instance = this;
 			_factory = factory;
 			_modeDataStack = new Stack<ModeData>();
 			_nextOpData = OpData.DoNothing;
 			_gameInst = gameInst;
-		} 
-
-		public void Start(int startModeId, object startParam = null) { 
-			_nextOpData = new OpData(ModeOp.kPush, startModeId, startParam);
 		}
-		
-		public void Stop() 	
-		{ 
-			_nextOpData = OpData.DoQuit; 
-		}	
+
+		public void Start(int startModeId, object startParam = null) {
+			_nextOpData = new OpData(ModeOp.Push, startModeId, startParam);
+		}
+
+		public void Stop()
+		{
+			_nextOpData = OpData.DoQuit;
+		}
 
 		public void SwitchToMode( int newModeId, object param=null)
 		{
-			_nextOpData = new OpData(ModeOp.kSwitch, newModeId, param);		
+			_nextOpData = new OpData(ModeOp.Switch, newModeId, param);
 		}
 
 		public void PushMode( int newModeId, object param=null)
 		{
-			_nextOpData = new OpData(ModeOp.kPush, newModeId, param);		
+			_nextOpData = new OpData(ModeOp.Push, newModeId, param);
 		}
 
 		public void PopMode(object result=null)
 		{
-			_nextOpData = new OpData(ModeOp.kPop, -1, result);		
+			_nextOpData = new OpData(ModeOp.Pop, -1, result);
 		}
 
-		public virtual bool Loop(float frameSecs) 
-		{ 
+		public virtual bool Loop(float frameSecs)
+		{
 			// return false to signal quit
 
 			// Get current op data and reset instance var
@@ -106,37 +101,37 @@ namespace GameModeMgr
 			_nextOpData = OpData.DoNothing;
 
 			// stop the current state and start/resume another
-			switch (curOpData.nextOp)
+			switch (curOpData.NextOp)
 			{
-			case ModeOp.kQuit:
+			case ModeOp.Quit:
 				_Stop();
 				return false; //  short circuit exit
 
-			case  ModeOp.kSwitch:
+			case  ModeOp.Switch:
 				_StopCurrentMode();
 				_StartMode(curOpData);
 				break;
 
-			case ModeOp.kPop:
-				string prevName = CurrentMode().GetType().Name;      
+			case ModeOp.Pop:
+				string prevName = CurrentMode().GetType().Name;
 				_StopCurrentMode();
-				_ResumeMode(prevName, curOpData.nextParam);
+				_ResumeMode(prevName, curOpData.NextParam);
 				break;
 
-			case ModeOp.kPush:                   
+			case ModeOp.Push:
 				_SuspendCurrentMode();
 				_StartMode(curOpData);
 				break;
 
-			}	
+			}
 
 			//# Now - whatever is current, call its loop
 			if (_modeDataStack.Count > 0)
 				CurrentMode().Loop(frameSecs);
-			
+
 			// If nothing on stack - we're done
 			return _modeDataStack.Count > 0;
-		}	
+		}
 
 		public IGameMode CurrentMode()
 		{
@@ -150,14 +145,14 @@ namespace GameModeMgr
 
 		//
 		// Internal calls
-		// 
+		//
 		protected ModeData _CurrentModeData()
 		{
 			try {
 				return _modeDataStack.Peek();
 			} catch (InvalidOperationException) {
 				return null;
-			}			
+			}
 		}
 
 		protected object _StopCurrentMode()
@@ -168,10 +163,10 @@ namespace GameModeMgr
 			object retVal = null;
 			IGameMode oldMode = CurrentMode();
 			if ( oldMode != null)
-			{      
+			{
 				retVal = oldMode.End(); // should still be on the stack (for potential GetCurrentState() during pop) TODO: Is this true?
-				_modeDataStack.Pop();  
-			}      
+				_modeDataStack.Pop();
+			}
 			return retVal;
 		}
 		protected void _Stop()
@@ -183,10 +178,10 @@ namespace GameModeMgr
 
 		protected void _StartMode(OpData opData)
 		{
-			IGameMode nextMode = _factory.Create(opData.nextModeId);
-			_modeDataStack.Push(new ModeData(opData.nextModeId, nextMode));
+			IGameMode nextMode = _factory.Create(opData.NextModeId);
+			_modeDataStack.Push(new ModeData(opData.NextModeId, nextMode));
 			nextMode.Setup(this, _gameInst);
-			nextMode.Start(opData.nextParam);
+			nextMode.Start(opData.NextParam);
 		}
 
 		protected void _SuspendCurrentMode()
@@ -199,7 +194,7 @@ namespace GameModeMgr
 		{
 			// Resume state a top of stack, passing it
 			// the result of the state that ended
-			CurrentMode()?.Resume(prevStateName, resultVal);	
+			CurrentMode()?.Resume(prevStateName, resultVal);
 		}
 	}
 }
