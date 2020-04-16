@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace GameModeMgr
 {
+	// ReSharper disable UnusedType.Global,ClassNeverInstantiated.Global
 	public class ModeManager {
 
 		// Operations
@@ -17,12 +18,12 @@ namespace GameModeMgr
 		};
 		protected class OpData
 		{
-			public ModeOp NextOp;
-			public int NextModeId;
-			public object NextParam;
+			public readonly ModeOp NextOp;
+			public readonly int NextModeId;
+			public readonly object NextParam;
 
-			public readonly static OpData DoNothing;
-			public readonly static OpData DoQuit;
+			public static readonly OpData DoNothing;
+			public static readonly OpData DoQuit;
 
 			public OpData(ModeOp op, int modeId, object param)
 			{
@@ -40,12 +41,12 @@ namespace GameModeMgr
 
 		protected class ModeData
 		{
-			public int modeId;
-			public IGameMode mode;
+			public readonly int ModeId;
+			public readonly IGameMode Mode;
 			public ModeData(int mId, IGameMode m)
 			{
-				modeId = mId;
-				mode = m;
+				ModeId = mId;
+				Mode = m;
 			}
 		}
 
@@ -54,10 +55,10 @@ namespace GameModeMgr
 		// Lifecycle
 		//
 
-		protected IModeFactory _factory;
-		protected IGameInstance _gameInst;
-		protected Stack<ModeData> _modeDataStack = null;
-		protected OpData _nextOpData = null;
+		private readonly IModeFactory _factory;
+		private readonly IGameInstance _gameInst;
+		private readonly Stack<ModeData> _modeDataStack;
+		private OpData _nextOpData;
 
 		public ModeManager(IModeFactory factory, IGameInstance gameInst = null)
 		{
@@ -67,6 +68,8 @@ namespace GameModeMgr
 			_gameInst = gameInst;
 		}
 
+		// public API
+		// ReSharper disable MemberCanBePrivate.Global,UnusedMember.Global,FieldCanBeMadeReadOnly.Global
 		public void Start(int startModeId, object startParam = null) {
 			_nextOpData = new OpData(ModeOp.Push, startModeId, startParam);
 		}
@@ -96,7 +99,7 @@ namespace GameModeMgr
 			// return false to signal quit
 
 			// Get current op data and reset instance var
-			IGameMode orgMode = CurrentMode();
+			// IGameMode orgMode = CurrentMode();
 			OpData curOpData = _nextOpData;
 			_nextOpData = OpData.DoNothing;
 
@@ -135,13 +138,15 @@ namespace GameModeMgr
 
 		public IGameMode CurrentMode()
 		{
-			return _CurrentModeData()?.mode;
+			return _CurrentModeData()?.Mode;
 		}
 
 		public int CurrentModeId()
 		{
-			return _CurrentModeData()?.modeId ?? -1;
+			return _CurrentModeData()?.ModeId ?? -1;
 		}
+
+		// ReSharper enable MemberCanBePrivate.Global,UnusedMember.Global,FieldCanBeMadeReadOnly.Global
 
 		//
 		// Internal calls

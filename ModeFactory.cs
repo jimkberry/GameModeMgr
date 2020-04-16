@@ -1,21 +1,22 @@
 using System.Collections.Generic;
-using System.Linq;
 using System;
 
-namespace GameModeMgr 
+namespace GameModeMgr
 {
+	// ReSharper disable UnusedType.Global
 	public interface IModeFactory
 	{
-		IGameMode Create(int modeId);		
+		IGameMode Create(int modeId);
 	}
 
 	public class ModeFactory : IModeFactory
 	{
-		protected Dictionary<int, Func<IGameMode>> modeFactories	= null;			
-        public IGameMode Create(int modeId) 
+		// ReSharper disable MemberCanBePrivate.Global,UnusedMember.Global,FieldCanBeMadeReadOnly.Global
+		protected Dictionary<int, Func<IGameMode>> ModeFactories	= null;
+        public IGameMode Create(int modeId)
         {
-            return modeFactories[modeId]();
-        }	
+            return ModeFactories[modeId]();
+        }
 	};
 }
 
