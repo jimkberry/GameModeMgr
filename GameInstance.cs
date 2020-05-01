@@ -6,6 +6,7 @@ namespace GameModeMgr
         // ReSharper disable UnusedMember.Global
         void Start(int initialMode);
         bool Loop(float frameSecs);
+        void End();
     }
 
     public class GameInstanceData
