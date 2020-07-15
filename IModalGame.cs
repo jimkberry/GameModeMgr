@@ -1,7 +1,7 @@
 namespace GameModeMgr
 {
     // ReSharper disable UnusedType.Global,ClassNeverInstantiated.Global
-    public interface IGameInstance
+    public interface IModalGame
     {
         // ReSharper disable UnusedMember.Global
         void Start(int initialMode);

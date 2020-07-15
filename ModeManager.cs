@@ -56,11 +56,11 @@ namespace GameModeMgr
 		//
 
 		private readonly IModeFactory _factory;
-		private readonly IGameInstance _gameInst;
+		private readonly IModalGame _gameInst;
 		private readonly Stack<ModeData> _modeDataStack;
 		private OpData _nextOpData;
 
-		public ModeManager(IModeFactory factory, IGameInstance gameInst = null)
+		public ModeManager(IModeFactory factory, IModalGame gameInst = null)
 		{
 			_factory = factory;
 			_modeDataStack = new Stack<ModeData>();
